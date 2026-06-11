@@ -12,6 +12,7 @@ import FichaColaborador     from './pages/FichaColaborador'
 import DashboardEquipe      from './pages/DashboardEquipe'
 import BancoTalentos        from './pages/talent/BancoTalentos'
 import TriagemCandidatos    from './pages/talent/TriagemCandidatos'
+import FichaCandidato       from './pages/talent/FichaCandidato.jsx'
 import Usuarios             from './pages/Usuarios'
 import TrabalheConosco      from './pages/TrabalheConosco'
 import ResponderFormulario  from './pages/ResponderFormulario'
@@ -45,13 +46,11 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Públicas */}
-          <Route path="/login"              element={<Login />} />
-          <Route path="/trabalhe-conosco"   element={<TrabalheConosco />} />
-          <Route path="/f/:token"           element={<ResponderFormulario />} />
-          <Route path="/form/:slug"         element={<FormularioPublico />} />
+          <Route path="/login"            element={<Login />} />
+          <Route path="/trabalhe-conosco" element={<TrabalheConosco />} />
+          <Route path="/f/:token"         element={<ResponderFormulario />} />
+          <Route path="/form/:slug"       element={<FormularioPublico />} />
 
-          {/* Protegidas */}
           <Route path="/" element={
             <RotaProtegida>
               <AppLayout />
@@ -69,6 +68,7 @@ function App() {
             <Route path="formularios/:id/respostas" element={<RespostasFormulario />} />
             <Route path="talentos"                  element={<BancoTalentos />} />
             <Route path="talentos/triagem"          element={<TriagemCandidatos />} />
+            <Route path="talentos/:id"              element={<FichaCandidato />} />
             <Route path="usuarios"                  element={<Usuarios />} />
             <Route path="auditoria"                 element={<EmBreve nome="Auditoria" />} />
           </Route>
