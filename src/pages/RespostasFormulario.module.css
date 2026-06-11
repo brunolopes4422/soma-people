@@ -1,0 +1,65 @@
+.page { max-width: 1100px; }
+
+.voltar { font-size: 12px; color: var(--text-3); background: none; border: none; cursor: pointer; padding: 0; margin-bottom: 1rem; font-family: var(--font); transition: color 0.12s; }
+.voltar:hover { color: var(--text); }
+
+.header { margin-bottom: 1.25rem; }
+.title    { font-size: 20px; font-weight: 500; color: var(--text); }
+.subtitle { font-size: 12px; color: var(--text-3); margin-top: 3px; }
+
+.layout { display: grid; grid-template-columns: 260px 1fr; gap: 1rem; align-items: flex-start; }
+
+.lista { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; max-height: 80vh; overflow-y: auto; }
+.listaHeader { font-size: 11px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; padding: 10px 12px; border-bottom: 0.5px solid var(--border); }
+.listaItem { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 0.5px solid var(--border); background: none; width: 100%; text-align: left; cursor: pointer; transition: background 0.12s; font-family: var(--font); }
+.listaItem:last-child { border-bottom: none; }
+.listaItem:hover:not(:disabled) { background: var(--bg); }
+.listaItem:disabled { cursor: default; }
+.listaAtivo { background: var(--bg); border-left: 2px solid var(--accent); }
+.listaPendente { opacity: 0.45; }
+.listaAvatar { width: 32px; height: 32px; border-radius: 50%; background: var(--purple-bg); color: var(--purple); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0; }
+.listaInfo { flex: 1; min-width: 0; }
+.listaNome  { display: block; font-size: 12px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.listaDept  { display: block; font-size: 10px; color: var(--text-3); }
+.badge { font-size: 11px; flex-shrink: 0; }
+.badge_respondido { color: var(--green); }
+.badge_pendente   { color: var(--amber); }
+.badge_expirado   { color: var(--red);   }
+
+.vazio { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; min-height: 400px; color: var(--text-3); font-size: 13px; }
+
+.painel { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; max-height: 80vh; overflow-y: auto; }
+
+.painelHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.painelNome  { font-size: 17px; font-weight: 500; color: var(--text); }
+.painelCargo { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.painelData  { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+
+.btnIA { padding: 8px 16px; background: var(--purple-bg); border: 0.5px solid rgba(139,92,246,0.3); border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; color: var(--purple); font-family: var(--font); cursor: pointer; white-space: nowrap; transition: background 0.12s; flex-shrink: 0; }
+.btnIA:hover:not(:disabled) { background: rgba(139,92,246,0.18); }
+.btnIA:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.secaoTitulo { font-size: 11px; font-weight: 500; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* Análise IA */
+.analiseBox { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; display: flex; flex-direction: column; gap: 12px; }
+.perfilDestaque { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--purple-bg); border-radius: var(--radius-sm); }
+.perfilLabel { font-size: 11px; color: var(--purple); text-transform: uppercase; letter-spacing: 0.05em; }
+.perfilValor { font-size: 16px; font-weight: 600; color: var(--purple); margin-left: auto; }
+.analiseTexto { font-size: 13px; color: var(--text-2); line-height: 1.65; }
+.chips { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.chipsLabel { font-size: 11px; color: var(--text-3); }
+.chipVerde { font-size: 11px; padding: 2px 8px; border-radius: 100px; background: var(--green-bg); color: var(--green); }
+.chipAmbar { font-size: 11px; padding: 2px 8px; border-radius: 100px; background: var(--amber-bg); color: var(--amber); }
+.recBox { background: var(--surface); border-radius: var(--radius-sm); padding: 10px 12px; border: 0.5px solid var(--border); }
+.recLabel { font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.recTexto { font-size: 13px; color: var(--text-2); line-height: 1.55; }
+
+/* Respostas */
+.respostasLista { display: flex; flex-direction: column; gap: 10px; }
+.respostaItem { background: var(--bg); border-radius: var(--radius-sm); padding: 10px 12px; border: 0.5px solid var(--border); }
+.respostaPergunta { font-size: 12px; color: var(--text-2); margin-bottom: 6px; display: flex; align-items: flex-start; gap: 8px; line-height: 1.5; }
+.respostaNum { min-width: 20px; height: 20px; border-radius: 50%; background: var(--surface); color: var(--accent); font-size: 10px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.respostaResposta { font-size: 13px; color: var(--text); font-weight: 500; padding-left: 28px; line-height: 1.5; }
+
+.estado { font-size: 13px; color: var(--text-3); padding: 1rem 12px; }

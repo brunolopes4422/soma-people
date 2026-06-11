@@ -173,3 +173,57 @@ function calcularTempo(dataAdmissao) {
   const m = meses % 12
   return anos > 0 ? `${anos} ano${anos > 1 ? 's' : ''} e ${m} meses` : `${meses} meses`
 }
+
+
+// ── 6. Analisar respostas de formulário ──────────────────────────
+
+export async function analisarRespostasFormulario(formulario, perguntas, respostas, colaborador) {
+  const isDisc = formulario.titulo.toLowerCase().includes('disc')
+
+  const respostasTexto = respostas.map((r, i) => {
+    const pergunta = perguntas.find(p => p.id === r.pergunta_id)
+    return `${i + 1}. ${pergunta?.texto || ''}\nResposta: ${r.resposta_opcao || r.resposta_texto || ''}`
+  }).join('\n\n')
+
+  const system = `Você é especialista em psicologia organizacional e análise comportamental.
+Retorne SOMENTE JSON válido, sem markdown, sem texto adicional.`
+
+  const user = isDisc ? `
+Analise as respostas do teste DISC e retorne exatamente neste JSON:
+{
+  "perfil_predominante": "D — Dominância|I — Influência|S — Estabilidade|C — Conformidade",
+  "perfil_secundario": "segundo perfil mais forte",
+  "descricao": "descrição do perfil em 4-5 frases",
+  "pontos_fortes": ["ponto1","ponto2","ponto3"],
+  "pontos_atencao": ["ponto1","ponto2"],
+  "estilo_comunicacao": "como essa pessoa prefere se comunicar",
+  "estilo_lideranca": "como essa pessoa lidera ou segue",
+  "recomendacao_gestao": "como o gestor deve lidar com esse perfil",
+  "compatibilidade_cargo": "análise de fit com o cargo atual"
+}
+
+Colaborador: ${colaborador?.nome || 'não informado'} | Cargo: ${colaborador?.cargo || ''}
+
+RESPOSTAS:
+${respostasTexto}` : `
+Analise as respostas do teste de Eneagrama e retorne exatamente neste JSON:
+{
+  "perfil_predominante": "Tipo X — Nome do tipo",
+  "asa": "asa identificada",
+  "descricao": "descrição do tipo em 4-5 frases",
+  "pontos_fortes": ["ponto1","ponto2","ponto3"],
+  "pontos_atencao": ["ponto1","ponto2"],
+  "motivacao_central": "o que motiva profundamente essa pessoa",
+  "medo_central": "o medo central desse tipo",
+  "recomendacao_gestao": "como o gestor deve lidar com esse perfil",
+  "compatibilidade_cargo": "análise de fit com o cargo atual"
+}
+
+Colaborador: ${colaborador?.nome || 'não informado'} | Cargo: ${colaborador?.cargo || ''}
+
+RESPOSTAS:
+${respostasTexto}`
+
+  const texto = await chamarIA(system, user, 1500)
+  return parseJSON(texto)
+}

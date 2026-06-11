@@ -18,6 +18,7 @@ export default function ListaFormularios() {
   const { perfil } = useAuth()
   const [formularios, setFormularios] = useState([])
   const [loading, setLoading]         = useState(true)
+  const [copiado, setCopiado]         = useState(null)
 
   useEffect(() => { carregar() }, [])
 
@@ -25,7 +26,7 @@ export default function ListaFormularios() {
     setLoading(true)
     const { data } = await supabase
       .from('formularios')
-      .select('*, formulario_perguntas(count)')
+      .select('*, formulario_perguntas(count), formulario_convites(count)')
       .order('created_at', { ascending: false })
     setFormularios(data ?? [])
     setLoading(false)
@@ -36,39 +37,14 @@ export default function ListaFormularios() {
     await carregar()
   }
 
-  async function duplicar(f) {
-    const { data: novo } = await supabase.from('formularios').insert({
-      titulo: f.titulo + ' (cópia)',
-      descricao: f.descricao,
-      tipo: f.tipo,
-      publico: false,
-      ativo: false,
-      configuracao: f.configuracao,
-      criado_por: perfil?.id,
-    }).select().single()
-
-    if (novo) {
-      const { data: perguntas } = await supabase
-        .from('formulario_perguntas')
-        .select('*')
-        .eq('formulario_id', f.id)
-        .order('ordem')
-
-      if (perguntas?.length) {
-        await supabase.from('formulario_perguntas').insert(
-          perguntas.map(p => ({
-            formulario_id: novo.id,
-            texto: p.texto,
-            tipo: p.tipo,
-            obrigatoria: p.obrigatoria,
-            ordem: p.ordem,
-            opcoes: p.opcoes,
-            configuracao: p.configuracao,
-          }))
-        )
-      }
-      navigate(`/formularios/${novo.id}`)
-    }
+  function copiarLink(id, tipo) {
+    const base = window.location.origin
+    const link = tipo === 'publico'
+      ? `${base}/form/${id}`
+      : `${base}/formularios/${id}`
+    navigator.clipboard.writeText(link)
+    setCopiado(id + tipo)
+    setTimeout(() => setCopiado(null), 2000)
   }
 
   const ativos   = formularios.filter(f => f.ativo).length
@@ -90,7 +66,7 @@ export default function ListaFormularios() {
       : formularios.length === 0 ? (
         <div className={styles.vazio}>
           <p className={styles.vazioTitulo}>Nenhum formulário criado ainda</p>
-          <p className={styles.vazioDesc}>Crie seu primeiro formulário para começar a avaliar colaboradores e candidatos.</p>
+          <p className={styles.vazioDesc}>Crie seu primeiro formulário para começar.</p>
           <button className={styles.btnNovo} onClick={() => navigate('/formularios/novo')}>
             + Criar primeiro formulário
           </button>
@@ -100,8 +76,12 @@ export default function ListaFormularios() {
           {formularios.map(f => {
             const tipo = TIPO_LABELS[f.tipo] || TIPO_LABELS.custom
             const qtdPerguntas = f.formulario_perguntas?.[0]?.count ?? 0
+            const qtdEnviados  = f.formulario_convites?.[0]?.count ?? 0
+            const linkPublico  = `${window.location.origin}/form/${f.id}`
             return (
               <div key={f.id} className={`${styles.card} ${!f.ativo ? styles.cardInativo : ''}`}>
+
+                {/* Info principal */}
                 <div className={styles.cardMain} onClick={() => navigate(`/formularios/${f.id}`)}>
                   <div className={styles.cardTopo}>
                     <span className={`${styles.tipoBadge} ${styles['tipo_' + tipo.cor]}`}>{tipo.label}</span>
@@ -110,14 +90,36 @@ export default function ListaFormularios() {
                   </div>
                   <h3 className={styles.cardTitulo}>{f.titulo}</h3>
                   {f.descricao && <p className={styles.cardDesc}>{f.descricao}</p>}
-                  <p className={styles.cardMeta}>{qtdPerguntas} pergunta{qtdPerguntas !== 1 ? 's' : ''}</p>
+                  <p className={styles.cardMeta}>
+                    {qtdPerguntas} pergunta{qtdPerguntas !== 1 ? 's' : ''}
+                    {qtdEnviados > 0 && ` · ${qtdEnviados} resposta${qtdEnviados !== 1 ? 's' : ''}`}
+                  </p>
                 </div>
+
+                {/* Link público */}
+                {f.publico && f.ativo && (
+                  <div className={styles.linkPublicoBox}>
+                    <span className={styles.linkPublicoLabel}>🔗 Link público</span>
+                    <span className={styles.linkPublicoUrl}>{linkPublico}</span>
+                    <button
+                      className={`${styles.btnCopiarLink} ${copiado === f.id + 'publico' ? styles.btnCopiado : ''}`}
+                      onClick={() => copiarLink(f.id, 'publico')}
+                    >
+                      {copiado === f.id + 'publico' ? '✓ Copiado!' : 'Copiar'}
+                    </button>
+                  </div>
+                )}
+
+                {/* Ações */}
                 <div className={styles.cardAcoes}>
                   <button className={styles.btnAcao} onClick={() => navigate(`/formularios/${f.id}`)}>
                     ✏️ Editar
                   </button>
-                  <button className={styles.btnAcao} onClick={() => duplicar(f)}>
-                    📋 Duplicar
+                  <button className={styles.btnAcao} onClick={() => navigate(`/formularios/${f.id}/respostas`)}>
+                    📋 Ver respostas {qtdEnviados > 0 && `(${qtdEnviados})`}
+                  </button>
+                  <button className={styles.btnAcao} onClick={() => navigate(`/formularios/${f.id}/enviar`)}>
+                    📨 Enviar individual
                   </button>
                   <button className={styles.btnAcao} onClick={() => toggleAtivo(f.id, f.ativo)}>
                     {f.ativo ? '⏸ Desativar' : '▶ Ativar'}

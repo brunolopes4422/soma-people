@@ -34,3 +34,47 @@
 .vazioDesc   { font-size: 13px; color: var(--text-3); max-width: 340px; line-height: 1.6; }
 
 .estado { font-size: 13px; color: var(--text-3); padding: 2rem 0; }
+
+/* Cole isso no FINAL do ListaFormularios.module.css */
+
+.linkPublicoBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--bg);
+  border-top: 0.5px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.linkPublicoLabel {
+  font-size: 11px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.linkPublicoUrl {
+  flex: 1;
+  font-size: 11px;
+  color: var(--text-2);
+  font-family: var(--mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.btnCopiarLink {
+  padding: 4px 10px;
+  background: var(--surface);
+  border: 0.5px solid var(--border-md);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  color: var(--text-2);
+  font-family: var(--font);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.12s;
+}
+.btnCopiarLink:hover { background: var(--bg); color: var(--text); }
+.btnCopiado { background: var(--green-bg); color: var(--green); border-color: transparent; }

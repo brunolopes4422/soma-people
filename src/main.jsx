@@ -15,8 +15,10 @@ import TriagemCandidatos    from './pages/talent/TriagemCandidatos'
 import Usuarios             from './pages/Usuarios'
 import TrabalheConosco      from './pages/TrabalheConosco'
 import ResponderFormulario  from './pages/ResponderFormulario'
+import FormularioPublico    from './pages/FormularioPublico'
 import ListaFormularios     from './pages/ListaFormularios'
 import EditorFormulario     from './pages/EditorFormulario'
+import RespostasFormulario  from './pages/RespostasFormulario'
 
 function EmBreve({ nome }) {
   return (
@@ -44,9 +46,10 @@ function App() {
       <AuthProvider>
         <Routes>
           {/* Públicas */}
-          <Route path="/login"            element={<Login />} />
-          <Route path="/trabalhe-conosco" element={<TrabalheConosco />} />
-          <Route path="/f/:token"         element={<ResponderFormulario />} />
+          <Route path="/login"              element={<Login />} />
+          <Route path="/trabalhe-conosco"   element={<TrabalheConosco />} />
+          <Route path="/f/:token"           element={<ResponderFormulario />} />
+          <Route path="/form/:slug"         element={<FormularioPublico />} />
 
           {/* Protegidas */}
           <Route path="/" element={
@@ -55,18 +58,19 @@ function App() {
             </RotaProtegida>
           }>
             <Route index element={<Navigate to="/colaboradores" replace />} />
-            <Route path="colaboradores"            element={<ListaColaboradores />} />
-            <Route path="colaboradores/novo"       element={<FormColaborador />} />
-            <Route path="colaboradores/:id"        element={<FichaColaborador />} />
-            <Route path="colaboradores/:id/editar" element={<FormColaborador />} />
-            <Route path="equipe"                   element={<DashboardEquipe />} />
-            <Route path="formularios"              element={<ListaFormularios />} />
-            <Route path="formularios/novo"         element={<EditorFormulario />} />
-            <Route path="formularios/:id"          element={<EditorFormulario />} />
-            <Route path="talentos"                 element={<BancoTalentos />} />
-            <Route path="talentos/triagem"         element={<TriagemCandidatos />} />
-            <Route path="usuarios"                 element={<Usuarios />} />
-            <Route path="auditoria"                element={<EmBreve nome="Auditoria" />} />
+            <Route path="colaboradores"             element={<ListaColaboradores />} />
+            <Route path="colaboradores/novo"        element={<FormColaborador />} />
+            <Route path="colaboradores/:id"         element={<FichaColaborador />} />
+            <Route path="colaboradores/:id/editar"  element={<FormColaborador />} />
+            <Route path="equipe"                    element={<DashboardEquipe />} />
+            <Route path="formularios"               element={<ListaFormularios />} />
+            <Route path="formularios/novo"          element={<EditorFormulario />} />
+            <Route path="formularios/:id"           element={<EditorFormulario />} />
+            <Route path="formularios/:id/respostas" element={<RespostasFormulario />} />
+            <Route path="talentos"                  element={<BancoTalentos />} />
+            <Route path="talentos/triagem"          element={<TriagemCandidatos />} />
+            <Route path="usuarios"                  element={<Usuarios />} />
+            <Route path="auditoria"                 element={<EmBreve nome="Auditoria" />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
