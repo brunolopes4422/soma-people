@@ -7,35 +7,36 @@ import { analisarPerfilColaborador } from '../lib/iaService'
 import styles from './FichaColaborador.module.css'
 
 const ABAS = [
-  { id: 'pessoal',    label: 'Pessoal'             },
-  { id: 'perfil',     label: 'Perfil & interesses'  },
-  { id: 'formacao',   label: 'Formação'             },
-  { id: 'skills',     label: 'Skills & IA'          },
+  { id: 'pessoal', label: 'Pessoal' },
+  { id: 'perfil', label: 'Perfil & interesses' },
+  { id: 'formacao', label: 'Formação' },
+  { id: 'skills', label: 'Skills & IA' },
   { id: 'financeiro', label: 'Financeiro', restrito: true },
-  { id: 'pdi',        label: 'Avaliações & PDI'     },
+  { id: 'pdi', label: 'Avaliações & PDI' },
+  { id: 'comportamental', label: 'Perfil comportamental' },
 ]
 
 const SKILLS_CONFIG = [
-  { id: 'comunicacao',            label: 'Comunicação',              grupo: 'Interpessoal' },
+  { id: 'comunicacao', label: 'Comunicação', grupo: 'Interpessoal' },
   { id: 'relacionamento_cliente', label: 'Relacionamento c/ cliente', grupo: 'Interpessoal' },
-  { id: 'trabalho_equipe',        label: 'Trabalho em equipe',       grupo: 'Interpessoal' },
-  { id: 'lideranca',              label: 'Liderança',                grupo: 'Interpessoal' },
-  { id: 'organizacao',            label: 'Organização',              grupo: 'Executivo'    },
-  { id: 'execucao',               label: 'Execução / Entrega',       grupo: 'Executivo'    },
-  { id: 'proatividade',           label: 'Proatividade',             grupo: 'Executivo'    },
-  { id: 'resiliencia',            label: 'Resiliência / Pressão',    grupo: 'Executivo'    },
-  { id: 'facilidade_aprendizado', label: 'Facilidade de aprendizado',grupo: 'Crescimento'  },
-  { id: 'autodidata',             label: 'Autodidata',               grupo: 'Crescimento'  },
-  { id: 'vendas',                 label: 'Vendas / Persuasão',       grupo: 'Crescimento'  },
-  { id: 'visao_estrategica',      label: 'Visão estratégica',        grupo: 'Crescimento'  },
+  { id: 'trabalho_equipe', label: 'Trabalho em equipe', grupo: 'Interpessoal' },
+  { id: 'lideranca', label: 'Liderança', grupo: 'Interpessoal' },
+  { id: 'organizacao', label: 'Organização', grupo: 'Executivo' },
+  { id: 'execucao', label: 'Execução / Entrega', grupo: 'Executivo' },
+  { id: 'proatividade', label: 'Proatividade', grupo: 'Executivo' },
+  { id: 'resiliencia', label: 'Resiliência / Pressão', grupo: 'Executivo' },
+  { id: 'facilidade_aprendizado', label: 'Facilidade de aprendizado', grupo: 'Crescimento' },
+  { id: 'autodidata', label: 'Autodidata', grupo: 'Crescimento' },
+  { id: 'vendas', label: 'Vendas / Persuasão', grupo: 'Crescimento' },
+  { id: 'visao_estrategica', label: 'Visão estratégica', grupo: 'Crescimento' },
 ]
 
 const PERFIS_ATUACAO = [
-  { id: 'perfil_campo',       label: 'Campo',         icon: '🏃' },
-  { id: 'perfil_atendimento', label: 'Atendimento',   icon: '🎧' },
-  { id: 'perfil_execucao',    label: 'Execução',      icon: '⚙️' },
-  { id: 'perfil_lideranca',   label: 'Liderança',     icon: '👑' },
-  { id: 'perfil_prova_fogo',  label: 'Prova de fogo', icon: '🔥' },
+  { id: 'perfil_campo', label: 'Campo', icon: '🏃' },
+  { id: 'perfil_atendimento', label: 'Atendimento', icon: '🎧' },
+  { id: 'perfil_execucao', label: 'Execução', icon: '⚙️' },
+  { id: 'perfil_lideranca', label: 'Liderança', icon: '👑' },
+  { id: 'perfil_prova_fogo', label: 'Prova de fogo', icon: '🔥' },
 ]
 
 export default function FichaColaborador() {
@@ -43,19 +44,19 @@ export default function FichaColaborador() {
   const navigate = useNavigate()
   const { perfil: userPerfil } = useAuth()
 
-  const [colab, setColab]           = useState(null)
-  const [aba, setAba]               = useState('pessoal')
-  const [loading, setLoading]       = useState(true)
+  const [colab, setColab] = useState(null)
+  const [aba, setAba] = useState('pessoal')
+  const [loading, setLoading] = useState(true)
   const [avaliacoes, setAvaliacoes] = useState([])
-  const [skills, setSkills]         = useState({})
+  const [skills, setSkills] = useState({})
   const [analisando, setAnalisando] = useState(false)
   const [salvandoSkills, setSalvandoSkills] = useState(false)
-  const [modalTipo, setModalTipo]   = useState(null)
+  const [modalTipo, setModalTipo] = useState(null)
 
-  const isSuperAdmin  = userPerfil?.perfil === 'super_admin'
+  const isSuperAdmin = userPerfil?.perfil === 'super_admin'
   const verFinanceiro = podeVer(userPerfil?.perfil, 'verFinanceiro')
   const verAvaliacoes = podeVer(userPerfil?.perfil, 'verAvaliacoes')
-  const podeEditar    = podeVer(userPerfil?.perfil, 'editarColaborador')
+  const podeEditar = podeVer(userPerfil?.perfil, 'editarColaborador')
 
   useEffect(() => { carregar() }, [id])
 
@@ -79,7 +80,7 @@ export default function FichaColaborador() {
 
   async function salvarSkills() {
     setSalvandoSkills(true)
-    const vals  = Object.values(skills).filter(v => v > 0)
+    const vals = Object.values(skills).filter(v => v > 0)
     const score = vals.length
       ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length)
       : 0
@@ -107,9 +108,9 @@ export default function FichaColaborador() {
       })
 
       await supabase.from('colaboradores').update({
-        skills_json:  skillsMescladas,
-        score_geral:  resultado.score_geral,
-        perfil_ia:    resultado.perfil_ia,
+        skills_json: skillsMescladas,
+        score_geral: resultado.score_geral,
+        perfil_ia: resultado.perfil_ia,
         analise_json: resultado,
       }).eq('id', id)
 
@@ -133,7 +134,7 @@ export default function FichaColaborador() {
   }
 
   if (loading) return <p className={styles.estado}>Carregando ficha...</p>
-  if (!colab)  return <p className={styles.estado}>Colaborador não encontrado.</p>
+  if (!colab) return <p className={styles.estado}>Colaborador não encontrado.</p>
 
   const analiseIA = colab.analise_json || {}
   const abasFiltradas = ABAS.filter(a => !a.restrito || verFinanceiro)
@@ -259,6 +260,10 @@ export default function FichaColaborador() {
           />
         )}
 
+        {aba === 'comportamental' && (
+          <SecaoComportamental analise={colab.analise_json || {}} />
+        )}
+
         {aba === 'financeiro' && verFinanceiro && (
           <div className={styles.secao}>
             <div className={styles.alertaRestrito}>
@@ -327,9 +332,9 @@ export default function FichaColaborador() {
 function SecaoSkills({ skills, setSkills, analiseIA, analisando, salvandoSkills, onSalvar, onAnalisar, podeEditar }) {
   const grupos = ['Interpessoal', 'Executivo', 'Crescimento']
   const APTO = {
-    'apto':              { label: 'Apto',        cls: 'aptoSim'     },
-    'parcialmente apto': { label: 'Parcial',      cls: 'aptoParcial' },
-    'não indicado':      { label: 'Não indicado', cls: 'aptoNao'     },
+    'apto': { label: 'Apto', cls: 'aptoSim' },
+    'parcialmente apto': { label: 'Parcial', cls: 'aptoParcial' },
+    'não indicado': { label: 'Não indicado', cls: 'aptoNao' },
   }
 
   return (
@@ -339,7 +344,7 @@ function SecaoSkills({ skills, setSkills, analiseIA, analisando, salvandoSkills,
           <p className={styles.secaoTitulo}>Perfis de atuação</p>
           <div className={styles.perfisGrid}>
             {PERFIS_ATUACAO.map(p => {
-              const val  = analiseIA[p.id] || 'não avaliado'
+              const val = analiseIA[p.id] || 'não avaliado'
               const info = APTO[val] || { label: 'Não avaliado', cls: 'aptoNeutro' }
               return (
                 <div key={p.id} className={styles.perfilCard}>
@@ -471,4 +476,153 @@ function iniciais(nome) {
 function formatarData(iso) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+function SecaoComportamental({ analise }) {
+  const disc     = analise.disc
+  const eneagrama = analise.eneagrama
+
+  if (!disc && !eneagrama) return (
+    <div className={styles.secao}>
+      <div className={styles.vazio}>
+        <p>Nenhum teste comportamental registrado ainda.</p>
+        <p style={{ fontSize: '12px', color: 'var(--text-3)', marginTop: '6px' }}>
+          Envie o formulário DISC ou Eneagrama para este colaborador pela seção de Formulários.
+        </p>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className={styles.secao}>
+
+      {disc && (
+        <div className={styles.testeBox}>
+          <div className={styles.testeTitulo}>
+            <span className={styles.testeIcone}>📊</span>
+            <span>DISC</span>
+            <span className={`${styles.perfilTag} ${styles.tagDisc}`}>
+              {disc.perfil_predominante}
+            </span>
+          </div>
+
+          {disc.perfil_secundario && (
+            <p className={styles.testeSecundario}>Perfil secundário: {disc.perfil_secundario}</p>
+          )}
+
+          {disc.descricao && (
+            <p className={styles.testeDesc}>{disc.descricao}</p>
+          )}
+
+          <div className={styles.testeColunas}>
+            {disc.pontos_fortes?.length > 0 && (
+              <div>
+                <p className={styles.testeSubtitulo}>Pontos fortes</p>
+                <div className={styles.chipRow}>
+                  {disc.pontos_fortes.map((p, i) => (
+                    <span key={i} className={styles.chipVerde}>{p}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {disc.pontos_atencao?.length > 0 && (
+              <div>
+                <p className={styles.testeSubtitulo}>Pontos de atenção</p>
+                <div className={styles.chipRow}>
+                  {disc.pontos_atencao.map((p, i) => (
+                    <span key={i} className={styles.chipAmbar}>{p}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {disc.estilo_comunicacao && (
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Comunicação</span>
+              <span className={styles.infoValor}>{disc.estilo_comunicacao}</span>
+            </div>
+          )}
+
+          {disc.estilo_lideranca && (
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Liderança</span>
+              <span className={styles.infoValor}>{disc.estilo_lideranca}</span>
+            </div>
+          )}
+
+          {disc.recomendacao_gestao && (
+            <div className={styles.recBox}>
+              <p className={styles.recLabel}>Recomendação para gestão</p>
+              <p className={styles.texto}>{disc.recomendacao_gestao}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {eneagrama && (
+        <div className={styles.testeBox}>
+          <div className={styles.testeTitulo}>
+            <span className={styles.testeIcone}>🔮</span>
+            <span>Eneagrama</span>
+            <span className={`${styles.perfilTag} ${styles.tagEnea}`}>
+              {eneagrama.perfil_predominante}
+            </span>
+          </div>
+
+          {eneagrama.asa && (
+            <p className={styles.testeSecundario}>Asa: {eneagrama.asa}</p>
+          )}
+
+          {eneagrama.descricao && (
+            <p className={styles.testeDesc}>{eneagrama.descricao}</p>
+          )}
+
+          <div className={styles.testeColunas}>
+            {eneagrama.pontos_fortes?.length > 0 && (
+              <div>
+                <p className={styles.testeSubtitulo}>Pontos fortes</p>
+                <div className={styles.chipRow}>
+                  {eneagrama.pontos_fortes.map((p, i) => (
+                    <span key={i} className={styles.chipVerde}>{p}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {eneagrama.pontos_atencao?.length > 0 && (
+              <div>
+                <p className={styles.testeSubtitulo}>Pontos de atenção</p>
+                <div className={styles.chipRow}>
+                  {eneagrama.pontos_atencao.map((p, i) => (
+                    <span key={i} className={styles.chipAmbar}>{p}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {eneagrama.motivacao_central && (
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Motivação central</span>
+              <span className={styles.infoValor}>{eneagrama.motivacao_central}</span>
+            </div>
+          )}
+
+          {eneagrama.medo_central && (
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Medo central</span>
+              <span className={styles.infoValor}>{eneagrama.medo_central}</span>
+            </div>
+          )}
+
+          {eneagrama.recomendacao_gestao && (
+            <div className={styles.recBox}>
+              <p className={styles.recLabel}>Recomendação para gestão</p>
+              <p className={styles.texto}>{eneagrama.recomendacao_gestao}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
 }

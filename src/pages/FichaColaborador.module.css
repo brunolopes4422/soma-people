@@ -253,3 +253,62 @@
 }
 
 .estado { font-size: 13px; color: var(--text-3); padding: 2rem 0; }
+
+
+.testeBox {
+  background: var(--bg);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+
+.testeTitulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.testeIcone { font-size: 18px; }
+
+.perfilTag {
+  margin-left: auto;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-weight: 500;
+}
+.tagDisc { background: rgba(59,130,246,0.12); color: #60a5fa; }
+.tagEnea { background: var(--purple-bg); color: var(--purple); }
+
+.testeSecundario { font-size: 12px; color: var(--text-3); }
+.testeDesc { font-size: 13px; color: var(--text-2); line-height: 1.65; }
+
+.testeColunas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.testeSubtitulo {
+  font-size: 11px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.infoRow {
+  display: flex;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 0.5px solid var(--border);
+}
+.infoLabel { font-size: 12px; color: var(--text-3); width: 140px; flex-shrink: 0; }
+.infoValor { font-size: 12px; color: var(--text-2); line-height: 1.5; }
