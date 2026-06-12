@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
-import styles from './TrabalheConosco.module.css'
+import styles from './FormularioPublico.module.css'
 
 export default function FormularioPublico() {
-  const { slug } = useParams() // pode ser o ID ou slug do formulário
-  const [etapa, setEtapa] = useState('identificacao') // identificacao | perguntas | sucesso
+  const { slug } = useParams()
+  const [etapa, setEtapa]       = useState('identificacao')
   const [formulario, setFormulario] = useState(null)
-  const [perguntas, setPerguntas] = useState([])
-  const [respostas, setRespostas] = useState({})
-  const [loading, setLoading] = useState(true)
+  const [perguntas, setPerguntas]   = useState([])
+  const [respostas, setRespostas]   = useState({})
+  const [perguntaAtual, setPerguntaAtual] = useState(0)
+  const [loading, setLoading]   = useState(true)
   const [enviando, setEnviando] = useState(false)
-  const [erro, setErro] = useState('')
+  const [erro, setErro]         = useState('')
   const [respondente, setRespondente] = useState({ nome: '', whatsapp: '' })
   const [colaboradorId, setColaboradorId] = useState(null)
 
@@ -19,18 +20,12 @@ export default function FormularioPublico() {
 
   async function carregar() {
     setLoading(true)
-    // Busca por ID ou por título slugificado
     const { data: f } = await supabase
-      .from('formularios')
-      .select('*')
-      .eq('id', slug)
-      .eq('publico', true)
-      .eq('ativo', true)
+      .from('formularios').select('*')
+      .eq('id', slug).eq('publico', true).eq('ativo', true)
       .single()
-
     if (!f) { setErro('Formulário não encontrado ou indisponível.'); setLoading(false); return }
     setFormulario(f)
-
     const { data: p } = await supabase
       .from('formulario_perguntas').select('*')
       .eq('formulario_id', f.id).order('ordem')
@@ -43,13 +38,10 @@ export default function FormularioPublico() {
       setErro('Preencha seu nome e WhatsApp.'); return
     }
     setErro('')
-
     const whatsapp = respondente.whatsapp.replace(/\D/g, '')
 
-    // Verifica se já respondeu
     const { data: jaRespondeu } = await supabase
-      .from('formulario_convites')
-      .select('id')
+      .from('formulario_convites').select('id')
       .eq('formulario_id', formulario.id)
       .eq('status', 'respondido')
       .ilike('email_destinatario', `%${whatsapp}%`)
@@ -60,64 +52,82 @@ export default function FormularioPublico() {
       return
     }
 
-    // Busca colaborador pelo whatsapp
     const { data: colab } = await supabase
-      .from('colaboradores')
-      .select('id, nome')
+      .from('colaboradores').select('id, nome')
       .ilike('whatsapp', `%${whatsapp}%`)
       .maybeSingle()
 
     if (colab) setColaboradorId(colab.id)
+    setPerguntaAtual(0)
     setEtapa('perguntas')
   }
-  
-  function atualizar(id, valor) {
-    setRespostas(r => ({ ...r, [id]: valor }))
+
+  function responderAtual(valor) {
+    const p = perguntas[perguntaAtual]
+    setRespostas(r => ({ ...r, [p.id]: valor }))
+  }
+
+  function avancar() {
+    const p = perguntas[perguntaAtual]
+    if (p.obrigatoria && !respostas[p.id]) {
+      setErro('Por favor responda esta pergunta.'); return
+    }
+    setErro('')
+    if (perguntaAtual < perguntas.length - 1) {
+      setPerguntaAtual(i => i + 1)
+    } else {
+      enviar()
+    }
+  }
+
+  function voltar() {
+    setErro('')
+    if (perguntaAtual > 0) setPerguntaAtual(i => i - 1)
+    else setEtapa('identificacao')
   }
 
   async function enviar() {
-    const obrigatorias = perguntas.filter(p => p.obrigatoria)
-    const faltando = obrigatorias.filter(p => !respostas[p.id]?.toString().trim())
-    if (faltando.length > 0) { setErro('Responda todas as perguntas obrigatórias.'); return }
-
     setEnviando(true); setErro('')
     try {
-      // Cria convite automático
-      const { data: convite } = await supabase
+      const { data: convite, error: errConvite } = await supabase
         .from('formulario_convites')
         .insert({
-          formulario_id: formulario.id,
-          colaborador_id: colaboradorId || null,
-          nome_destinatario: respondente.nome,
-          email_destinatario: respondente.whatsapp,
-          status: 'respondido',
-          respondido_em: new Date().toISOString(),
+          formulario_id:      formulario.id,
+          colaborador_id:     colaboradorId || null,
+          nome_destinatario:  respondente.nome,
+          email_destinatario: respondente.whatsapp.replace(/\D/g, ''),
+          status:             'respondido',
+          respondido_em:      new Date().toISOString(),
         })
         .select().single()
 
-      if (!convite) throw new Error('Erro ao registrar resposta.')
+      if (errConvite || !convite) throw new Error(errConvite?.message || 'Erro ao registrar.')
 
-      // Salva respostas
-      await supabase.from('formulario_respostas').insert(
+      const { error: errResp } = await supabase.from('formulario_respostas').insert(
         perguntas.map(p => ({
-          convite_id: convite.id,
-          formulario_id: formulario.id,
-          pergunta_id: p.id,
-          resposta_texto: p.tipo === 'texto_livre' ? respostas[p.id] : null,
-          resposta_numero: p.tipo === 'escala' ? Number(respostas[p.id]) : null,
-          resposta_opcao: ['multipla_escolha', 'sim_nao'].includes(p.tipo) ? respostas[p.id] : null,
+          convite_id:      convite.id,
+          formulario_id:   formulario.id,
+          pergunta_id:     p.id,
+          resposta_texto:  p.tipo === 'texto_livre' ? respostas[p.id] || null : null,
+          resposta_numero: p.tipo === 'escala' ? Number(respostas[p.id]) || null : null,
+          resposta_opcao:  ['multipla_escolha','sim_nao'].includes(p.tipo) ? respostas[p.id] || null : null,
         }))
       )
 
+      if (errResp) throw new Error(errResp.message)
       setEtapa('sucesso')
-    } catch (e) { setErro('Erro ao enviar: ' + e.message) }
-    setEnviando(false)
+    } catch (e) {
+      setErro('Erro ao enviar: ' + e.message)
+      setEnviando(false)
+    }
   }
+
+  // ── Loading / Erro / Sucesso ──────────────────────────────────
 
   if (loading) return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <p style={{ color: '#808080', textAlign: 'center', paddingTop: '4rem' }}>Carregando...</p>
+        <p className={styles.carregando}>Carregando...</p>
       </div>
     </div>
   )
@@ -125,9 +135,9 @@ export default function FormularioPublico() {
   if (erro && !formulario) return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <div className={styles.sucessoCard}>
-          <div style={{ fontSize: '28px' }}>⚠️</div>
-          <h2 className={styles.sucessoTitulo}>{erro}</h2>
+        <div className={styles.resultadoCard}>
+          <span className={styles.resultadoIcone}>⚠️</span>
+          <h2 className={styles.resultadoTitulo}>{erro}</h2>
         </div>
       </div>
     </div>
@@ -136,152 +146,190 @@ export default function FormularioPublico() {
   if (etapa === 'sucesso') return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <div className={styles.sucessoCard}>
-          <div className={styles.sucessoIcon}>✓</div>
-          <h2 className={styles.sucessoTitulo}>Respostas enviadas!</h2>
-          <p className={styles.sucessoTexto}>
-            Obrigado, <strong>{respondente.nome}</strong>! Suas respostas foram registradas com sucesso.
+        <div className={styles.resultadoCard}>
+          <span className={styles.resultadoIcone}>✓</span>
+          <h2 className={styles.resultadoTitulo}>Respostas enviadas!</h2>
+          <p className={styles.resultadoDesc}>
+            Obrigado, <strong>{respondente.nome.split(' ')[0]}</strong>!
+            Suas respostas foram registradas com sucesso.
           </p>
         </div>
       </div>
     </div>
   )
 
+  const p = perguntas[perguntaAtual]
+  const respondidas = perguntas.filter(p => respostas[p.id] !== undefined).length
+  const progresso   = Math.round((respondidas / perguntas.length) * 100)
+
+  // ── Identificação ─────────────────────────────────────────────
+
+  if (etapa === 'identificacao') return (
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <div className={styles.logo}>
+          <span className={styles.logoIcone}>◆</span>
+          <span className={styles.logoNome}>Soma</span>
+        </div>
+        <div className={styles.formularioInfo}>
+          <h1 className={styles.formularioTitulo}>{formulario?.titulo}</h1>
+          {formulario?.descricao && <p className={styles.formularioDesc}>{formulario.descricao}</p>}
+          <p className={styles.formularioCount}>{perguntas.length} perguntas</p>
+        </div>
+        <div className={styles.card}>
+          <h2 className={styles.cardTitulo}>Antes de começar</h2>
+          <p className={styles.cardDesc}>Precisamos te identificar para registrar suas respostas corretamente.</p>
+          <div className={styles.campos}>
+            <div className={styles.campo}>
+              <label>Nome completo *</label>
+              <input
+                value={respondente.nome}
+                onChange={e => setRespondente(r => ({ ...r, nome: e.target.value }))}
+                placeholder="Seu nome completo"
+                onKeyDown={e => e.key === 'Enter' && identificar()}
+                autoFocus
+              />
+            </div>
+            <div className={styles.campo}>
+              <label>WhatsApp *</label>
+              <input
+                value={respondente.whatsapp}
+                onChange={e => setRespondente(r => ({ ...r, whatsapp: e.target.value }))}
+                placeholder="(00) 99999-9999"
+                onKeyDown={e => e.key === 'Enter' && identificar()}
+              />
+            </div>
+          </div>
+          {erro && <p className={styles.erro}>{erro}</p>}
+          <button className={styles.btnPrimario} onClick={identificar}>
+            Começar →
+          </button>
+        </div>
+        <p className={styles.rodape}>Suas respostas são tratadas com sigilo.</p>
+      </div>
+    </div>
+  )
+
+  // ── Perguntas (uma por vez) ───────────────────────────────────
+
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        <div className={styles.header}>
+
+        {/* Header */}
+        <div className={styles.perguntaHeader}>
           <div className={styles.logo}>
-            <span className={styles.logoIcon}>◆</span>
-            <span className={styles.logoText}>Soma</span>
+            <span className={styles.logoIcone}>◆</span>
+            <span className={styles.logoNome}>Soma</span>
           </div>
-          <h1 className={styles.titulo}>{formulario?.titulo}</h1>
-          {formulario?.descricao && (
-            <p className={styles.subtitulo}>{formulario.descricao}</p>
-          )}
+          <span className={styles.perguntaContador}>
+            {perguntaAtual + 1} / {perguntas.length}
+          </span>
         </div>
 
-        <div className={styles.card}>
+        {/* Barra de progresso */}
+        <div className={styles.progressoBar}>
+          <div className={styles.progressoFill} style={{ width: `${((perguntaAtual) / perguntas.length) * 100}%` }} />
+        </div>
 
-          {/* Etapa 1 — Identificação */}
-          {etapa === 'identificacao' && (
-            <div className={styles.etapaConteudo}>
-              <h2 className={styles.etapaTitulo}>Antes de começar</h2>
-              <p className={styles.etapaDesc}>Precisamos identificar você para vincular suas respostas corretamente.</p>
-              <div className={styles.campos}>
-                <div className={styles.campo}>
-                  <label className={styles.campoLabel}>Nome completo *</label>
-                  <input
-                    className={styles.campoInput}
-                    value={respondente.nome}
-                    onChange={e => setRespondente(r => ({ ...r, nome: e.target.value }))}
-                    placeholder="Seu nome completo"
-                    autoFocus
-                  />
-                </div>
-                <div className={styles.campo}>
-                  <label className={styles.campoLabel}>WhatsApp *</label>
-                  <input
-                    className={styles.campoInput}
-                    value={respondente.whatsapp}
-                    onChange={e => setRespondente(r => ({ ...r, whatsapp: e.target.value }))}
-                    placeholder="(00) 99999-9999"
-                  />
-                </div>
-              </div>
-              {erro && <p className={styles.erro}>{erro}</p>}
-              <div className={styles.navegacao}>
-                <button className={styles.btnAvancar} onClick={identificar}>
-                  Continuar →
+        {/* Card da pergunta */}
+        <div className={styles.card}>
+          <p className={styles.perguntaNum}>Pergunta {perguntaAtual + 1}</p>
+          <h2 className={styles.perguntaTexto}>{p.texto}</h2>
+
+          {/* Múltipla escolha */}
+          {p.tipo === 'multipla_escolha' && (
+            <div className={styles.opcoes}>
+              {(Array.isArray(p.opcoes) ? p.opcoes : []).map((op, i) => (
+                <button
+                  key={op}
+                  className={`${styles.opcao} ${respostas[p.id] === op ? styles.opcaoSelecionada : ''}`}
+                  onClick={() => { responderAtual(op); setErro('') }}
+                >
+                  <span className={styles.opcaoLetra}>{String.fromCharCode(65 + i)}</span>
+                  <span className={styles.opcaoTexto}>{op}</span>
                 </button>
-              </div>
+              ))}
             </div>
           )}
 
-          {/* Etapa 2 — Perguntas */}
-          {etapa === 'perguntas' && (
-            <div className={styles.etapaConteudo}>
-              <h2 className={styles.etapaTitulo}>Olá, {respondente.nome.split(' ')[0]}!</h2>
-              <p className={styles.etapaDesc}>
-                Responda com sinceridade — não há respostas certas ou erradas.
-              </p>
-              <div className={styles.campos}>
-                {perguntas.map((p, idx) => (
-                  <div key={p.id} className={styles.pergunta}>
-                    <label className={styles.perguntaLabel}>
-                      <span className={styles.perguntaNum}>{idx + 1}</span>
-                      {p.texto}
-                      {p.obrigatoria && <span className={styles.obrigatorio}> *</span>}
-                    </label>
+          {/* Sim / Não */}
+          {p.tipo === 'sim_nao' && (
+            <div className={styles.simNao}>
+              {['Sim', 'Não'].map(op => (
+                <button
+                  key={op}
+                  className={`${styles.btnSimNao} ${respostas[p.id] === op ? styles.opcaoSelecionada : ''}`}
+                  onClick={() => { responderAtual(op); setErro('') }}
+                >{op}</button>
+              ))}
+            </div>
+          )}
 
-                    {p.tipo === 'texto_livre' && (
-                      <textarea className={styles.perguntaInput} rows={3}
-                        value={respostas[p.id] || ''}
-                        onChange={e => atualizar(p.id, e.target.value)}
-                        placeholder="Sua resposta..." />
-                    )}
+          {/* Texto livre */}
+          {p.tipo === 'texto_livre' && (
+            <textarea
+              className={styles.textareaLivre}
+              rows={4}
+              value={respostas[p.id] || ''}
+              onChange={e => responderAtual(e.target.value)}
+              placeholder="Sua resposta..."
+              autoFocus
+            />
+          )}
 
-                    {p.tipo === 'multipla_escolha' && (
-                      <div className={styles.opcoes}>
-                        {(Array.isArray(p.opcoes) ? p.opcoes : []).map(op => (
-                          <label key={op} className={`${styles.opcao} ${respostas[p.id] === op ? styles.opcaoSelecionada : ''}`}>
-                            <input type="radio" name={p.id} value={op}
-                              checked={respostas[p.id] === op}
-                              onChange={() => atualizar(p.id, op)} />
-                            {op}
-                          </label>
-                        ))}
-                      </div>
-                    )}
-
-                    {p.tipo === 'sim_nao' && (
-                      <div className={styles.opcoes}>
-                        {['Sim', 'Não'].map(op => (
-                          <label key={op} className={`${styles.opcao} ${respostas[p.id] === op ? styles.opcaoSelecionada : ''}`}>
-                            <input type="radio" name={p.id} value={op}
-                              checked={respostas[p.id] === op}
-                              onChange={() => atualizar(p.id, op)} />
-                            {op}
-                          </label>
-                        ))}
-                      </div>
-                    )}
-
-                    {p.tipo === 'escala' && (
-                      <div className={styles.escalaWrap}>
-                        <div className={styles.escalaOpcoes}>
-                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
-                            <button key={n}
-                              className={`${styles.escalaBotao} ${respostas[p.id] === n ? styles.escalaSelecionado : ''}`}
-                              onClick={() => atualizar(p.id, n)}
-                            >{n}</button>
-                          ))}
-                        </div>
-                        <div className={styles.escalaLabels}>
-                          <span>Muito baixo</span>
-                          <span>Muito alto</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+          {/* Escala */}
+          {p.tipo === 'escala' && (
+            <div className={styles.escala}>
+              <div className={styles.escalaOpcoes}>
+                {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                  <button
+                    key={n}
+                    className={`${styles.escalaBotao} ${respostas[p.id] === n ? styles.opcaoSelecionada : ''}`}
+                    onClick={() => { responderAtual(n); setErro('') }}
+                  >{n}</button>
                 ))}
               </div>
-
-              {erro && <p className={styles.erro}>{erro}</p>}
-
-              <div className={styles.navegacao}>
-                <button className={styles.btnVoltar} onClick={() => setEtapa('identificacao')}>
-                  ← Voltar
-                </button>
-                <button className={styles.btnEnviar} onClick={enviar} disabled={enviando}>
-                  {enviando ? '⏳ Enviando...' : '✓ Enviar respostas'}
-                </button>
+              <div className={styles.escalaLabels}>
+                <span>Discordo totalmente</span>
+                <span>Concordo totalmente</span>
               </div>
             </div>
           )}
+
+          {erro && <p className={styles.erro}>{erro}</p>}
+
+          {/* Navegação */}
+          <div className={styles.navegacao}>
+            <button className={styles.btnSecundario} onClick={voltar}>
+              ← Voltar
+            </button>
+            <button
+              className={styles.btnPrimario}
+              onClick={avancar}
+              disabled={enviando}
+            >
+              {enviando ? '⏳ Enviando...'
+                : perguntaAtual === perguntas.length - 1 ? '✓ Concluir'
+                : 'Próxima →'}
+            </button>
+          </div>
         </div>
 
-        <p className={styles.rodape}>Suas respostas são tratadas com sigilo.</p>
+        {/* Rodapé com bolinhas de progresso */}
+        <div className={styles.bolinhas}>
+          {perguntas.map((pq, i) => (
+            <div
+              key={pq.id}
+              className={`${styles.bolinha}
+                ${i === perguntaAtual ? styles.bolinhaAtual : ''}
+                ${respostas[pq.id] ? styles.bolinhaRespondida : ''}
+              `}
+              title={`Pergunta ${i + 1}${respostas[pq.id] ? ' ✓' : ''}`}
+            />
+          ))}
+        </div>
+
       </div>
     </div>
   )

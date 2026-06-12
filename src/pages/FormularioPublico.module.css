@@ -1,0 +1,275 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+.page {
+  min-height: 100vh;
+  background: #0a0a0a;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 1rem 4rem;
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+
+.container {
+  width: 100%;
+  max-width: 580px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.carregando {
+  color: #606060;
+  text-align: center;
+  padding-top: 4rem;
+  font-size: 14px;
+}
+
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.logoIcone { font-size: 16px; color: #5b5bd6; }
+.logoNome  { font-size: 15px; font-weight: 700; color: #f0f0f0; }
+
+/* Info do formulário */
+.formularioInfo { text-align: center; padding: 1rem 0; }
+.formularioTitulo { font-size: 26px; font-weight: 600; color: #f0f0f0; letter-spacing: -0.02em; margin-bottom: 8px; }
+.formularioDesc   { font-size: 14px; color: #808080; line-height: 1.6; }
+.formularioCount  { font-size: 12px; color: #404040; margin-top: 8px; }
+
+/* Card */
+.card {
+  background: #141414;
+  border: 0.5px solid #222;
+  border-radius: 16px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.cardTitulo { font-size: 17px; font-weight: 500; color: #f0f0f0; }
+.cardDesc   { font-size: 13px; color: #606060; line-height: 1.6; margin-top: -6px; }
+
+/* Campos identificação */
+.campos { display: flex; flex-direction: column; gap: 12px; }
+.campo  { display: flex; flex-direction: column; gap: 5px; }
+.campo label { font-size: 12px; font-weight: 500; color: #a0a0a0; }
+.campo input {
+  padding: 11px 14px;
+  border: 0.5px solid #2a2a2a;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #f0f0f0;
+  background: #0f0f0f;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.campo input:focus { border-color: #5b5bd6; }
+
+/* Header pergunta */
+.perguntaHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.perguntaContador {
+  font-size: 12px;
+  color: #404040;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Progresso */
+.progressoBar {
+  height: 3px;
+  background: #1a1a1a;
+  border-radius: 100px;
+  overflow: hidden;
+}
+.progressoFill {
+  height: 100%;
+  background: #5b5bd6;
+  border-radius: 100px;
+  transition: width 0.3s ease;
+}
+
+/* Pergunta */
+.perguntaNum  { font-size: 11px; color: #5b5bd6; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+.perguntaTexto { font-size: 19px; font-weight: 500; color: #f0f0f0; line-height: 1.45; }
+
+/* Opções múltipla escolha */
+.opcoes { display: flex; flex-direction: column; gap: 8px; }
+.opcao {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid #222;
+  border-radius: 10px;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.12s;
+  font-family: inherit;
+  width: 100%;
+}
+.opcao:hover { border-color: #333; background: #111; }
+.opcaoSelecionada { border-color: #5b5bd6 !important; background: rgba(91,91,214,0.08) !important; }
+
+.opcaoLetra {
+  min-width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: #1a1a1a;
+  color: #606060;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.12s;
+}
+.opcaoSelecionada .opcaoLetra { background: #5b5bd6; color: #fff; }
+.opcaoTexto { font-size: 13px; color: #c0c0c0; line-height: 1.5; }
+.opcaoSelecionada .opcaoTexto { color: #e0e0e0; }
+
+/* Sim / Não */
+.simNao { display: flex; gap: 10px; }
+.btnSimNao {
+  flex: 1;
+  padding: 14px;
+  border: 1px solid #222;
+  border-radius: 10px;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #808080;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.btnSimNao:hover { border-color: #333; color: #f0f0f0; }
+.btnSimNao.opcaoSelecionada { border-color: #5b5bd6; color: #8888ff; background: rgba(91,91,214,0.08); }
+
+/* Texto livre */
+.textareaLivre {
+  padding: 12px 14px;
+  border: 1px solid #222;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #f0f0f0;
+  background: #0f0f0f;
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+  line-height: 1.6;
+  transition: border-color 0.15s;
+}
+.textareaLivre:focus { border-color: #5b5bd6; }
+
+/* Escala */
+.escala { display: flex; flex-direction: column; gap: 10px; }
+.escalaOpcoes { display: flex; gap: 6px; flex-wrap: wrap; }
+.escalaBotao {
+  width: 46px;
+  height: 46px;
+  border: 1px solid #222;
+  border-radius: 10px;
+  background: none;
+  font-size: 14px;
+  font-weight: 500;
+  color: #606060;
+  cursor: pointer;
+  transition: all 0.12s;
+  font-family: inherit;
+}
+.escalaBotao:hover { border-color: #333; color: #f0f0f0; }
+.escalaBotao.opcaoSelecionada { border-color: #5b5bd6; color: #8888ff; background: rgba(91,91,214,0.08); }
+.escalaLabels { display: flex; justify-content: space-between; font-size: 11px; color: #404040; }
+
+/* Navegação */
+.navegacao {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.5rem;
+  border-top: 0.5px solid #1a1a1a;
+  gap: 10px;
+}
+
+.btnPrimario {
+  padding: 11px 28px;
+  background: #5b5bd6;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  margin-left: auto;
+}
+.btnPrimario:hover:not(:disabled) { opacity: 0.85; }
+.btnPrimario:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btnSecundario {
+  padding: 11px 18px;
+  background: none;
+  border: 0.5px solid #2a2a2a;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #606060;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.btnSecundario:hover { border-color: #404040; color: #a0a0a0; }
+
+/* Bolinhas de progresso */
+.bolinhas {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  padding: 0.5rem 0;
+}
+
+.bolinha {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #222;
+  transition: all 0.2s;
+  cursor: default;
+}
+.bolinhaAtual    { background: #5b5bd6; transform: scale(1.3); }
+.bolinhaRespondida { background: #1d6f4a; }
+
+/* Erro */
+.erro { font-size: 12px; color: #c03030; }
+
+/* Resultado sucesso/erro */
+.resultadoCard {
+  background: #141414;
+  border: 0.5px solid #222;
+  border-radius: 16px;
+  padding: 3rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 3rem;
+}
+.resultadoIcone { font-size: 40px; }
+.resultadoTitulo { font-size: 22px; font-weight: 600; color: #f0f0f0; }
+.resultadoDesc   { font-size: 14px; color: #808080; line-height: 1.7; max-width: 360px; }
+
+/* Rodapé */
+.rodape { font-size: 11px; color: #2a2a2a; text-align: center; }
