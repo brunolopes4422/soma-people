@@ -5,13 +5,13 @@ import styles from './TrabalheConosco.module.css'
 
 export default function FormularioPublico() {
   const { slug } = useParams() // pode ser o ID ou slug do formulário
-  const [etapa, setEtapa]         = useState('identificacao') // identificacao | perguntas | sucesso
+  const [etapa, setEtapa] = useState('identificacao') // identificacao | perguntas | sucesso
   const [formulario, setFormulario] = useState(null)
   const [perguntas, setPerguntas] = useState([])
   const [respostas, setRespostas] = useState({})
-  const [loading, setLoading]     = useState(true)
-  const [enviando, setEnviando]   = useState(false)
-  const [erro, setErro]           = useState('')
+  const [loading, setLoading] = useState(true)
+  const [enviando, setEnviando] = useState(false)
+  const [erro, setErro] = useState('')
   const [respondente, setRespondente] = useState({ nome: '', whatsapp: '' })
   const [colaboradorId, setColaboradorId] = useState(null)
 
@@ -44,18 +44,33 @@ export default function FormularioPublico() {
     }
     setErro('')
 
-    // Busca colaborador pelo whatsapp
     const whatsapp = respondente.whatsapp.replace(/\D/g, '')
+
+    // Verifica se já respondeu
+    const { data: jaRespondeu } = await supabase
+      .from('formulario_convites')
+      .select('id')
+      .eq('formulario_id', formulario.id)
+      .eq('status', 'respondido')
+      .ilike('email_destinatario', `%${whatsapp}%`)
+      .maybeSingle()
+
+    if (jaRespondeu) {
+      setErro('Você já respondeu este formulário. Obrigado!')
+      return
+    }
+
+    // Busca colaborador pelo whatsapp
     const { data: colab } = await supabase
       .from('colaboradores')
       .select('id, nome')
       .ilike('whatsapp', `%${whatsapp}%`)
-      .single()
+      .maybeSingle()
 
     if (colab) setColaboradorId(colab.id)
     setEtapa('perguntas')
   }
-
+  
   function atualizar(id, valor) {
     setRespostas(r => ({ ...r, [id]: valor }))
   }
@@ -71,12 +86,12 @@ export default function FormularioPublico() {
       const { data: convite } = await supabase
         .from('formulario_convites')
         .insert({
-          formulario_id:     formulario.id,
-          colaborador_id:    colaboradorId || null,
+          formulario_id: formulario.id,
+          colaborador_id: colaboradorId || null,
           nome_destinatario: respondente.nome,
           email_destinatario: respondente.whatsapp,
-          status:            'respondido',
-          respondido_em:     new Date().toISOString(),
+          status: 'respondido',
+          respondido_em: new Date().toISOString(),
         })
         .select().single()
 
@@ -85,12 +100,12 @@ export default function FormularioPublico() {
       // Salva respostas
       await supabase.from('formulario_respostas').insert(
         perguntas.map(p => ({
-          convite_id:    convite.id,
+          convite_id: convite.id,
           formulario_id: formulario.id,
-          pergunta_id:   p.id,
-          resposta_texto:  p.tipo === 'texto_livre' ? respostas[p.id] : null,
+          pergunta_id: p.id,
+          resposta_texto: p.tipo === 'texto_livre' ? respostas[p.id] : null,
           resposta_numero: p.tipo === 'escala' ? Number(respostas[p.id]) : null,
-          resposta_opcao:  ['multipla_escolha','sim_nao'].includes(p.tipo) ? respostas[p.id] : null,
+          resposta_opcao: ['multipla_escolha', 'sim_nao'].includes(p.tipo) ? respostas[p.id] : null,
         }))
       )
 
@@ -235,7 +250,7 @@ export default function FormularioPublico() {
                     {p.tipo === 'escala' && (
                       <div className={styles.escalaWrap}>
                         <div className={styles.escalaOpcoes}>
-                          {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
                             <button key={n}
                               className={`${styles.escalaBotao} ${respostas[p.id] === n ? styles.escalaSelecionado : ''}`}
                               onClick={() => atualizar(p.id, n)}
